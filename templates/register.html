@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Register - MedicalCare AI{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-card">
+        <div style="text-align:center; margin-bottom: 1.5rem;">
+            <div class="brand-logo" style="margin: 0 auto 1rem; width: 56px; height: 56px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--navy);">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+            </div>
+        </div>
+        <h2>Create Account</h2>
+        <p class="auth-subtitle">Join MedicalCare AI for personalized health tracking</p>
+
+        <form method="POST" action="/register">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" name="name" required placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" name="email" required placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required placeholder="Min 6 characters" minlength="6">
+            </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" required placeholder="Confirm your password">
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+        </form>
+        <div class="auth-links">
+            Already have an account? <a href="/login">Login here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

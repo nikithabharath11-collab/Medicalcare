@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}BMI Calculator - MedicalCare AI{% endblock %}
+
+{% block content %}
+<div class="prediction-page">
+    <div class="page-header">
+        <h1>BMI Calculator</h1>
+        <p>Calculate your Body Mass Index and get personalized health recommendations</p>
+    </div>
+
+    <div class="form-card" style="max-width: 600px; margin: 0 auto;">
+        <form id="bmiForm">
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="form-group">
+                    <label>Weight (kg)</label>
+                    <input type="number" name="weight" min="20" max="300" step="0.1" required placeholder="e.g., 70">
+                </div>
+                <div class="form-group">
+                    <label>Height (cm)</label>
+                    <input type="number" name="height" min="100" max="250" step="0.1" required placeholder="e.g., 170">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">Calculate BMI</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="spinner" id="spinner"></div>
+
+    <div class="result-card" id="resultCard" style="max-width: 600px; margin: 2rem auto 0;">
+        <div style="text-align: center;">
+            <div class="bmi-gauge" id="bmiGauge">
+                <div class="bmi-value" id="bmiValue">--</div>
+                <div class="bmi-category" id="bmiCategory">BMI</div>
+            </div>
+        </div>
+
+        <div class="bmi-scale">
+            <div style="background: #64b5f6;">Under</div>
+            <div style="background: #69f0ae;">Normal</div>
+            <div style="background: #ffd740;">Over</div>
+            <div style="background: #ff5252;">Obese</div>
+        </div>
+
+        <div id="bmiRisk" style="text-align: center; margin: 1rem 0; font-size: 1.1rem; font-weight: 600;"></div>
+
+        <div id="bmiTips" style="margin-top: 1.5rem;"></div>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <button class="btn btn-gold-outline btn-sm" onclick="downloadBMIReport()">Download PDF Report</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let lastResult = null;
+
+document.getElementById('bmiForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const spinner = document.getElementById('spinner');
+    const resultCard = document.getElementById('resultCard');
+    resultCard.classList.remove('show');
+    spinner.classList.add('show');
+
+    const data = {};
+    new FormData(e.target).forEach((val, key) => data[key] = val);
+
+    try {
+        const res = await fetch('/api/bmi', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        spinner.classList.remove('show');
+
+        if (json.status === 'success') {
+            lastResult = json.result;
+            const r = json.result;
+
+            document.getElementById('bmiValue').textContent = r.bmi;
+            document.getElementById('bmiCategory').textContent = r.category;
+            document.getElementById('bmiGauge').style.borderColor = r.color;
+            document.getElementById('bmiValue').style.color = r.color;
+
+            document.getElementById('bmiRisk').innerHTML =
+                `Risk Level: <span style="color: ${r.color};">${r.risk}</span>`;
+
+            let tipsHtml = '<h4 style="color: var(--gold); margin-bottom: 0.75rem;">Health Tips:</h4><ul style="list-style: none; padding: 0;">';
+            r.tips.forEach(tip => {
+                tipsHtml += `<li style="padding: 0.5rem 0; color: var(--text-secondary); border-bottom: 1px solid rgba(255,255,255,0.05);">&#8226; ${tip}</li>`;
+            });
+            tipsHtml += '</ul>';
+            document.getElementById('bmiTips').innerHTML = tipsHtml;
+
+            resultCard.classList.add('show');
+        } else {
+            alert('Error: ' + json.message);
+        }
+    } catch(err) {
+        spinner.classList.remove('show');
+        alert('Error connecting to server.');
+    }
+});
+
+async function downloadBMIReport() {
+    if (!lastResult) return;
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                model: 'BMI Calculator',
+                result: lastResult.category + ' (BMI: ' + lastResult.bmi + ')',
+                confidence: lastResult.bmi,
+                details: 'Risk Level: ' + lastResult.risk + '\n\nTips:\n' + lastResult.tips.join('\n')
+            })
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'MedicalCare_BMI_Report.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch(err) {
+        alert('Error generating report.');
+    }
+}
+</script>
+{% endblock %}

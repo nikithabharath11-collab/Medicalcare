@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}Medical Image Classification{% endblock %}
+
+{% block content %}
+<div class="prediction-page">
+    <div class="page-header">
+        <h1>Medical Image Classification</h1>
+        <p>Upload chest X-ray images for AI-powered analysis using CNN with MobileNetV2 transfer learning</p>
+    </div>
+
+    <div class="form-card">
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">Upload Medical Image</h3>
+            <p>Drag & drop or click to select a chest X-ray image</p>
+            <p style="font-size: 0.85rem;">Supported: PNG, JPG, JPEG (max 16MB)</p>
+            <img id="previewImage" class="preview-image" alt="Preview">
+        </div>
+        <input type="file" id="fileInput" accept=".png,.jpg,.jpeg" style="display:none" onchange="handleFile(this)">
+
+        <div class="form-actions">
+            <button class="btn btn-primary btn-lg" onclick="classifyImage()" id="classifyBtn" disabled>Classify Image</button>
+        </div>
+    </div>
+
+    <div class="spinner" id="spinner"></div>
+    <div class="result-card" id="resultCard">
+        <div class="result-header">
+            <div class="result-icon" id="resultIcon"></div>
+            <div class="result-title">
+                <h3 id="resultTitle"></h3>
+                <p id="resultSubtitle"></p>
+            </div>
+        </div>
+        <div class="result-details" id="resultDetails"></div>
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <button class="btn btn-gold-outline btn-sm" onclick="downloadReport()">Download PDF Report</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedFile = null;
+const uploadArea = document.getElementById('uploadArea');
+const preview = document.getElementById('previewImage');
+
+// Drag and drop
+uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        document.getElementById('fileInput').files = e.dataTransfer.files;
+        handleFile(document.getElementById('fileInput'));
+    }
+});
+
+function handleFile(input) {
+    if (input.files && input.files[0]) {
+        selectedFile = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(selectedFile);
+        document.getElementById('classifyBtn').disabled = false;
+    }
+}
+
+async function classifyImage() {
+    if (!selectedFile) { alert('Please upload an image first.'); return; }
+
+    const spinner = document.getElementById('spinner');
+    const resultCard = document.getElementById('resultCard');
+    resultCard.classList.remove('show');
+    spinner.classList.add('show');
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+        const res = await fetch('/api/predict/image', {
+            method: 'POST',
+            body: formData
+        });
+        const json = await res.json();
+        spinner.classList.remove('show');
+
+        if (json.status === 'success') {
+            const r = json.result;
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const subtitle = document.getElementById('resultSubtitle');
+            const details = document.getElementById('resultDetails');
+
+            if (r.prediction === 'Normal') {
+                icon.className = 'result-icon success';
+                icon.innerHTML = '&#10003;';
+            } else {
+                icon.className = 'result-icon danger';
+                icon.innerHTML = '&#9888;';
+            }
+
+            title.textContent = 'Classification: ' + r.prediction;
+            subtitle.textContent = 'Confidence: ' + r.confidence + '%' + (r.note ? ' (' + r.note + ')' : '');
+
+            let html = '';
+            r.all_predictions.forEach(pred => {
+                const color = pred.category === 'Normal' ? 'green' : 'red';
+                html += `
+                    <div class="result-item">
+                        <div class="value">${pred.probability}%</div>
+                        <div class="label">${pred.category}</div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar ${color}" style="width:${pred.probability}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            details.innerHTML = html;
+            resultCard.classList.add('show');
+            window._lastResult = r;
+        } else {
+            alert('Error: ' + json.message);
+        }
+    } catch(err) {
+        spinner.classList.remove('show');
+        alert('Error connecting to server.');
+    }
+}
+
+async function downloadReport() {
+    if (!window._lastResult) return;
+    const r = window._lastResult;
+    let details = r.all_predictions.map(p => p.category + ': ' + p.probability + '%').join('\n');
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                model: 'Medical Image Classification',
+                result: r.prediction,
+                confidence: r.confidence,
+                details: details + (r.note ? '\n\nNote: ' + r.note : '')
+            })
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'MedicalCare_Image_Report.pdf'; a.click();
+        URL.revokeObjectURL(url);
+    } catch(err) { alert('Error generating report.'); }
+}
+</script>
+{% endblock %}

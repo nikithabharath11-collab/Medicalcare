@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MedicalCare AI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="navbar-brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    MedicalCare AI
+                    <span>Health Science Platform</span>
+                </div>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                {% if current_user.is_authenticated %}
+                <li><a href="/dashboard" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+                <li><a href="/heart-disease" class="{% if request.endpoint == 'heart_disease_page' %}active{% endif %}">Heart</a></li>
+                <li><a href="/diabetes" class="{% if request.endpoint == 'diabetes_page' %}active{% endif %}">Diabetes</a></li>
+                <li><a href="/disease-prediction" class="{% if request.endpoint == 'disease_prediction_page' %}active{% endif %}">Symptoms</a></li>
+                <li><a href="/breast-cancer" class="{% if request.endpoint == 'breast_cancer_page' %}active{% endif %}">Cancer</a></li>
+                <li><a href="/image-classification" class="{% if request.endpoint == 'image_classification_page' %}active{% endif %}">X-Ray</a></li>
+                <li><a href="/bmi" class="{% if request.endpoint == 'bmi_page' %}active{% endif %}">BMI</a></li>
+                <li><a href="/ai-chat" class="{% if request.endpoint == 'ai_chat_page' %}active{% endif %}">AI Chat</a></li>
+                <div class="nav-auth">
+                    <span class="user-greeting">Hi, <strong>{{ current_user.name }}</strong></span>
+                    <a href="/patient-history" class="btn-nav-login" style="{% if request.endpoint == 'patient_history' %}color: var(--gold);{% endif %}">Patient History</a>
+                    <a href="/profile" class="btn-nav-login" style="{% if request.endpoint == 'profile' %}color: var(--gold);{% endif %}">Profile</a>
+                    <a href="/logout" style="color: #ff5252;">Logout</a>
+                </div>
+                {% else %}
+                <div class="nav-auth">
+                    <a href="/login" class="btn-nav-login">Login</a>
+                    <a href="/register">Register</a>
+                </div>
+                {% endif %}
+            </ul>
+            <div class="hamburger" onclick="toggleNav()">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="max-width: 600px; margin: 1rem auto; padding: 0 1rem;">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>MedicalCare AI</h3>
+                <p>Leveraging Machine Learning &amp; Deep Learning for intelligent disease prediction and health analysis.</p>
+            </div>
+            <div class="footer-creator">
+                <h4>Created By</h4>
+                <p><strong style="color: var(--gold); font-size: 1.1rem;">B NIKITHA</strong></p>
+                <p>25BCE2517</p>
+                <p>Vellore Institute of Technology, Vellore</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <a href="/dashboard">Dashboard</a>
+                <a href="/ai-chat">AI Health Chat</a>
+                <a href="/bmi">BMI Calculator</a>
+                <a href="/about">About Project</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Medical Care &amp; Health Science &mdash; ML/DL Project &bull; Built with Flask, Scikit-Learn, TensorFlow &bull; For Educational Purposes Only</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleNav() {
+            document.getElementById('navLinks').classList.toggle('show');
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

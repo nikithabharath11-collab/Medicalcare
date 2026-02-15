@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Breast Cancer Detection{% endblock %}
+
+{% block content %}
+<div class="prediction-page">
+    <div class="page-header">
+        <h1>Breast Cancer Detection</h1>
+        <p>Deep Neural Network analysis of cell nucleus measurements for malignant vs benign classification</p>
+    </div>
+
+    <div class="form-card">
+        <form id="cancerForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Radius Mean</label>
+                    <input type="number" name="radius_mean" step="0.01" required placeholder="e.g., 14.5">
+                </div>
+                <div class="form-group">
+                    <label>Texture Mean</label>
+                    <input type="number" name="texture_mean" step="0.01" required placeholder="e.g., 15.2">
+                </div>
+                <div class="form-group">
+                    <label>Perimeter Mean</label>
+                    <input type="number" name="perimeter_mean" step="0.01" required placeholder="e.g., 90.5">
+                </div>
+                <div class="form-group">
+                    <label>Area Mean</label>
+                    <input type="number" name="area_mean" step="0.01" required placeholder="e.g., 600">
+                </div>
+                <div class="form-group">
+                    <label>Smoothness Mean</label>
+                    <input type="number" name="smoothness_mean" step="0.0001" required placeholder="e.g., 0.1">
+                </div>
+                <div class="form-group">
+                    <label>Compactness Mean</label>
+                    <input type="number" name="compactness_mean" step="0.0001" required placeholder="e.g., 0.15">
+                </div>
+                <div class="form-group">
+                    <label>Concavity Mean</label>
+                    <input type="number" name="concavity_mean" step="0.0001" required placeholder="e.g., 0.1">
+                </div>
+                <div class="form-group">
+                    <label>Concave Points Mean</label>
+                    <input type="number" name="concave_points_mean" step="0.0001" required placeholder="e.g., 0.05">
+                </div>
+                <div class="form-group">
+                    <label>Symmetry Mean</label>
+                    <input type="number" name="symmetry_mean" step="0.0001" required placeholder="e.g., 0.18">
+                </div>
+                <div class="form-group">
+                    <label>Fractal Dimension Mean</label>
+                    <input type="number" name="fractal_dimension_mean" step="0.0001" required placeholder="e.g., 0.06">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">Analyze Tumor</button>
+                <button type="button" class="btn btn-outline" style="margin-left:1rem;" onclick="fillSample('benign')">Sample: Benign</button>
+                <button type="button" class="btn btn-outline" style="margin-left:0.5rem;" onclick="fillSample('malignant')">Sample: Malignant</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="spinner" id="spinner"></div>
+    <div class="result-card" id="resultCard">
+        <div class="result-header">
+            <div class="result-icon" id="resultIcon"></div>
+            <div class="result-title">
+                <h3 id="resultTitle"></h3>
+                <p id="resultSubtitle"></p>
+            </div>
+        </div>
+        <div class="result-details" id="resultDetails"></div>
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <button class="btn btn-gold-outline btn-sm" onclick="downloadReport()">Download PDF Report</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const samples = {
+    benign: {
+        radius_mean: 12.5, texture_mean: 14.2, perimeter_mean: 78.5, area_mean: 450,
+        smoothness_mean: 0.09, compactness_mean: 0.08, concavity_mean: 0.05,
+        concave_points_mean: 0.03, symmetry_mean: 0.17, fractal_dimension_mean: 0.06
+    },
+    malignant: {
+        radius_mean: 20.5, texture_mean: 22.1, perimeter_mean: 135.0, area_mean: 1200,
+        smoothness_mean: 0.12, compactness_mean: 0.25, concavity_mean: 0.3,
+        concave_points_mean: 0.15, symmetry_mean: 0.22, fractal_dimension_mean: 0.08
+    }
+};
+
+function fillSample(type) {
+    const s = samples[type];
+    for (const [key, val] of Object.entries(s)) {
+        document.querySelector(`[name="${key}"]`).value = val;
+    }
+}
+
+document.getElementById('cancerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const spinner = document.getElementById('spinner');
+    const resultCard = document.getElementById('resultCard');
+    resultCard.classList.remove('show');
+    spinner.classList.add('show');
+
+    const data = {};
+    new FormData(e.target).forEach((val, key) => data[key] = val);
+
+    try {
+        const res = await fetch('/api/predict/breast-cancer', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        spinner.classList.remove('show');
+
+        if (json.status === 'success') {
+            const r = json.result;
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const subtitle = document.getElementById('resultSubtitle');
+            const details = document.getElementById('resultDetails');
+
+            if (r.prediction === 1) {
+                icon.className = 'result-icon danger';
+                icon.innerHTML = '&#9888;';
+                title.textContent = 'Malignant Tumor Detected';
+                subtitle.textContent = 'The deep learning model classifies this as malignant. Immediate medical consultation recommended.';
+            } else {
+                icon.className = 'result-icon success';
+                icon.innerHTML = '&#10003;';
+                title.textContent = 'Benign Tumor Detected';
+                subtitle.textContent = 'The deep learning model classifies this as benign. Regular monitoring advised.';
+            }
+
+            details.innerHTML = `
+                <div class="result-item">
+                    <div class="value">${r.confidence}%</div>
+                    <div class="label">Model Confidence</div>
+                </div>
+                <div class="result-item">
+                    <div class="value" style="color: #198754">${r.probabilities.benign}%</div>
+                    <div class="label">Benign Probability</div>
+                    <div class="progress-bar-container"><div class="progress-bar green" style="width:${r.probabilities.benign}%"></div></div>
+                </div>
+                <div class="result-item">
+                    <div class="value" style="color: #dc3545">${r.probabilities.malignant}%</div>
+                    <div class="label">Malignant Probability</div>
+                    <div class="progress-bar-container"><div class="progress-bar red" style="width:${r.probabilities.malignant}%"></div></div>
+                </div>
+            `;
+            resultCard.classList.add('show');
+            window._lastResult = r;
+        } else {
+            alert('Error: ' + json.message);
+        }
+    } catch(err) {
+        spinner.classList.remove('show');
+        alert('Error connecting to server.');
+    }
+});
+
+async function downloadReport() {
+    if (!window._lastResult) return;
+    const r = window._lastResult;
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                model: 'Breast Cancer Detection',
+                result: r.diagnosis,
+                confidence: r.confidence,
+                details: 'Benign: ' + r.probabilities.benign + '%\nMalignant: ' + r.probabilities.malignant + '%'
+            })
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'MedicalCare_Breast_Cancer_Report.pdf'; a.click();
+        URL.revokeObjectURL(url);
+    } catch(err) { alert('Error generating report.'); }
+}
+</script>
+{% endblock %}

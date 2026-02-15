@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}Heart Disease Prediction{% endblock %}
+
+{% block content %}
+<div class="prediction-page">
+    <div class="page-header">
+        <h1>Heart Disease Prediction</h1>
+        <p>Enter patient details to predict cardiovascular disease risk using Gradient Boosting Classifier</p>
+    </div>
+
+    <div class="form-card">
+        <form id="heartForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Age (years)</label>
+                    <input type="number" name="age" min="1" max="120" required placeholder="e.g., 55">
+                </div>
+                <div class="form-group">
+                    <label>Sex</label>
+                    <select name="sex" required>
+                        <option value="">Select</option>
+                        <option value="1">Male</option>
+                        <option value="0">Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Chest Pain Type</label>
+                    <select name="cp" required>
+                        <option value="">Select</option>
+                        <option value="0">Typical Angina</option>
+                        <option value="1">Atypical Angina</option>
+                        <option value="2">Non-anginal Pain</option>
+                        <option value="3">Asymptomatic</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Resting Blood Pressure (mm Hg)</label>
+                    <input type="number" name="trestbps" min="80" max="250" required placeholder="e.g., 130">
+                </div>
+                <div class="form-group">
+                    <label>Serum Cholesterol (mg/dl)</label>
+                    <input type="number" name="chol" min="100" max="600" required placeholder="e.g., 250">
+                </div>
+                <div class="form-group">
+                    <label>Fasting Blood Sugar > 120 mg/dl</label>
+                    <select name="fbs" required>
+                        <option value="">Select</option>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Resting ECG Results</label>
+                    <select name="restecg" required>
+                        <option value="">Select</option>
+                        <option value="0">Normal</option>
+                        <option value="1">ST-T Wave Abnormality</option>
+                        <option value="2">Left Ventricular Hypertrophy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Max Heart Rate Achieved</label>
+                    <input type="number" name="thalach" min="60" max="220" required placeholder="e.g., 150">
+                </div>
+                <div class="form-group">
+                    <label>Exercise Induced Angina</label>
+                    <select name="exang" required>
+                        <option value="">Select</option>
+                        <option value="1">Yes</option>
+                        <option value="0">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>ST Depression (Oldpeak)</label>
+                    <input type="number" name="oldpeak" min="0" max="7" step="0.1" required placeholder="e.g., 1.5">
+                </div>
+                <div class="form-group">
+                    <label>Slope of Peak Exercise ST</label>
+                    <select name="slope" required>
+                        <option value="">Select</option>
+                        <option value="0">Upsloping</option>
+                        <option value="1">Flat</option>
+                        <option value="2">Downsloping</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Number of Major Vessels (0-4)</label>
+                    <input type="number" name="ca" min="0" max="4" required placeholder="e.g., 0">
+                </div>
+                <div class="form-group">
+                    <label>Thalassemia</label>
+                    <select name="thal" required>
+                        <option value="">Select</option>
+                        <option value="0">Normal</option>
+                        <option value="1">Fixed Defect</option>
+                        <option value="2">Reversible Defect</option>
+                        <option value="3">Not Described</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">Predict Heart Disease Risk</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="spinner" id="spinner"></div>
+    <div class="result-card" id="resultCard">
+        <div class="result-header">
+            <div class="result-icon" id="resultIcon"></div>
+            <div class="result-title">
+                <h3 id="resultTitle"></h3>
+                <p id="resultSubtitle"></p>
+            </div>
+        </div>
+        <div class="result-details" id="resultDetails"></div>
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <button class="btn btn-gold-outline btn-sm" onclick="downloadReport()">Download PDF Report</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('heartForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const spinner = document.getElementById('spinner');
+    const resultCard = document.getElementById('resultCard');
+
+    resultCard.classList.remove('show');
+    spinner.classList.add('show');
+
+    const data = {};
+    new FormData(form).forEach((val, key) => data[key] = val);
+
+    try {
+        const res = await fetch('/api/predict/heart', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        spinner.classList.remove('show');
+
+        if (json.status === 'success') {
+            const r = json.result;
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const subtitle = document.getElementById('resultSubtitle');
+            const details = document.getElementById('resultDetails');
+
+            if (r.prediction === 1) {
+                icon.className = 'result-icon danger';
+                icon.innerHTML = '&#9888;';
+                title.textContent = 'High Risk of Heart Disease';
+                subtitle.textContent = 'The model predicts a higher risk. Please consult a cardiologist.';
+            } else {
+                icon.className = 'result-icon success';
+                icon.innerHTML = '&#10003;';
+                title.textContent = 'Low Risk of Heart Disease';
+                subtitle.textContent = 'The model predicts a lower risk. Maintain a healthy lifestyle!';
+            }
+
+            details.innerHTML = `
+                <div class="result-item">
+                    <div class="value">${r.confidence}%</div>
+                    <div class="label">Model Confidence</div>
+                </div>
+                <div class="result-item">
+                    <div class="value" style="color: #198754">${r.probabilities.low_risk}%</div>
+                    <div class="label">Low Risk Probability</div>
+                    <div class="progress-bar-container"><div class="progress-bar green" style="width:${r.probabilities.low_risk}%"></div></div>
+                </div>
+                <div class="result-item">
+                    <div class="value" style="color: #dc3545">${r.probabilities.high_risk}%</div>
+                    <div class="label">High Risk Probability</div>
+                    <div class="progress-bar-container"><div class="progress-bar red" style="width:${r.probabilities.high_risk}%"></div></div>
+                </div>
+            `;
+            resultCard.classList.add('show');
+            window._lastResult = r;
+        } else {
+            alert('Error: ' + json.message);
+        }
+    } catch(err) {
+        spinner.classList.remove('show');
+        alert('Error connecting to server. Make sure models are trained.');
+    }
+});
+
+async function downloadReport() {
+    if (!window._lastResult) return;
+    const r = window._lastResult;
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                model: 'Heart Disease Prediction',
+                result: r.risk,
+                confidence: r.confidence,
+                details: 'Low Risk: ' + r.probabilities.low_risk + '%\nHigh Risk: ' + r.probabilities.high_risk + '%'
+            })
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'MedicalCare_Heart_Disease_Report.pdf'; a.click();
+        URL.revokeObjectURL(url);
+    } catch(err) { alert('Error generating report.'); }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,15 @@
+flask
+numpy
+pandas
+scikit-learn
+matplotlib
+seaborn
+Pillow
+joblib
+Werkzeug
+flask-login
+flask-sqlalchemy
+fpdf2
+google-generativeai
+requests
+gunicorn

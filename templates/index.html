@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}MedicalCare AI - Health Science Platform{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">AI-Powered Healthcare</div>
+        <h1>Medical Care &amp; Health Science</h1>
+        <p>Leveraging Machine Learning and Deep Learning for intelligent disease prediction,
+           diagnosis assistance, medical image analysis, and personalized health insights.</p>
+        <div class="hero-buttons">
+            <a href="/dashboard" class="btn btn-primary btn-lg">Explore Dashboard</a>
+            <a href="/ai-chat" class="btn btn-outline btn-lg">AI Health Chat</a>
+            <a href="/about" class="btn btn-gold-outline btn-lg">Learn More</a>
+        </div>
+        <div class="hero-stats">
+            <div class="hero-stat"><div class="number">5</div><div class="label">AI Models</div></div>
+            <div class="hero-stat"><div class="number">10+</div><div class="label">Diseases</div></div>
+            <div class="hero-stat"><div class="number">95%+</div><div class="label">Accuracy</div></div>
+            <div class="hero-stat"><div class="number">24/7</div><div class="label">AI Chat</div></div>
+        </div>
+    </div>
+</section>
+
+<section class="container" style="padding-top: 4rem;">
+    <div class="section-title">
+        <h2>AI-Powered <span class="gold">Health Predictions</span></h2>
+        <div class="section-divider"></div>
+        <p>Choose a prediction model to analyze health conditions</p>
+    </div>
+
+    <div class="cards-grid">
+        <div class="card">
+            <div class="card-header gradient-1">
+                <h3>Heart Disease Prediction</h3>
+                <div class="card-icon">&#9829;</div>
+            </div>
+            <div class="card-body">
+                <p>Predict cardiovascular disease risk using patient vitals like blood pressure, cholesterol levels, and ECG results.</p>
+                <span class="card-tag tag-ml">Machine Learning</span>
+                <span class="card-tag tag-ml">Gradient Boosting</span>
+            </div>
+            <div class="card-footer"><a href="/heart-disease" class="btn btn-primary">Predict Now</a></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header gradient-2">
+                <h3>Diabetes Prediction</h3>
+                <div class="card-icon">&#9883;</div>
+            </div>
+            <div class="card-body">
+                <p>Assess diabetes risk using glucose levels, BMI, insulin, blood pressure and other health indicators.</p>
+                <span class="card-tag tag-ml">Machine Learning</span>
+                <span class="card-tag tag-ml">Random Forest</span>
+            </div>
+            <div class="card-footer"><a href="/diabetes" class="btn btn-primary">Predict Now</a></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header gradient-3">
+                <h3>Disease from Symptoms</h3>
+                <div class="card-icon">&#9762;</div>
+            </div>
+            <div class="card-body">
+                <p>Select your symptoms and our multi-class classifier will predict possible diseases with precautions.</p>
+                <span class="card-tag tag-ml">Machine Learning</span>
+                <span class="card-tag tag-ml">Multi-Class</span>
+            </div>
+            <div class="card-footer"><a href="/disease-prediction" class="btn btn-primary">Predict Now</a></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header gradient-4">
+                <h3>Breast Cancer Detection</h3>
+                <div class="card-icon">&#9878;</div>
+            </div>
+            <div class="card-body">
+                <p>Deep Neural Network for detecting malignant vs benign tumors using cell nucleus measurements.</p>
+                <span class="card-tag tag-dl">Deep Learning</span>
+                <span class="card-tag tag-dl">Neural Network</span>
+            </div>
+            <div class="card-footer"><a href="/breast-cancer" class="btn btn-primary">Predict Now</a></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header gradient-5">
+                <h3>Medical Image Analysis</h3>
+                <div class="card-icon">&#9881;</div>
+            </div>
+            <div class="card-body">
+                <p>Upload chest X-ray images for AI-powered classification using CNN with MobileNetV2 transfer learning.</p>
+                <span class="card-tag tag-dl">Deep Learning</span>
+                <span class="card-tag tag-cv">Computer Vision</span>
+            </div>
+            <div class="card-footer"><a href="/image-classification" class="btn btn-primary">Upload Image</a></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header gradient-6">
+                <h3>AI Health Chat</h3>
+                <div class="card-icon">&#9993;</div>
+            </div>
+            <div class="card-body">
+                <p>Chat with our AI-powered health assistant powered by Google Gemini for instant medical guidance.</p>
+                <span class="card-tag tag-ai">Gemini AI</span>
+                <span class="card-tag tag-new">NEW</span>
+            </div>
+            <div class="card-footer"><a href="/ai-chat" class="btn btn-primary">Chat Now</a></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header gradient-2">
+                <h3>BMI Calculator</h3>
+                <div class="card-icon">&#9874;</div>
+            </div>
+            <div class="card-body">
+                <p>Calculate your Body Mass Index and get personalized health recommendations based on your results.</p>
+                <span class="card-tag tag-ai">Health Tool</span>
+                <span class="card-tag tag-new">NEW</span>
+            </div>
+            <div class="card-footer"><a href="/bmi" class="btn btn-primary">Calculate BMI</a></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header gradient-1">
+                <h3>Analytics Dashboard</h3>
+                <div class="card-icon">&#9776;</div>
+            </div>
+            <div class="card-body">
+                <p>View model performance, health news feed, accuracy comparisons, and detailed analytics.</p>
+                <span class="card-tag tag-ml">Analytics</span>
+                <span class="card-tag tag-dl">Visualization</span>
+            </div>
+            <div class="card-footer"><a href="/dashboard" class="btn btn-primary">View Dashboard</a></div>
+        </div>
+    </div>
+</section>
+
+<section class="container">
+    <div class="section-title">
+        <h2>Technology <span class="gold">Stack</span></h2>
+        <div class="section-divider"></div>
+    </div>
+    <div class="tech-stack">
+        <div class="tech-item"><h4>Scikit-Learn</h4><p>Random Forest, SVM, GBM</p></div>
+        <div class="tech-item"><h4>TensorFlow / Keras</h4><p>DNN, CNN, Transfer Learning</p></div>
+        <div class="tech-item"><h4>Flask</h4><p>RESTful API Backend</p></div>
+        <div class="tech-item"><h4>Google Gemini</h4><p>AI Chat Assistant</p></div>
+        <div class="tech-item"><h4>SQLite</h4><p>User Auth & History</p></div>
+        <div class="tech-item"><h4>Pandas / NumPy</h4><p>Data Processing</p></div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Disease Prediction from Symptoms{% endblock %}
+
+{% block content %}
+<div class="prediction-page">
+    <div class="page-header">
+        <h1>Disease Prediction from Symptoms</h1>
+        <p>Select your symptoms below and our AI model will predict possible diseases with precautions</p>
+    </div>
+
+    <div class="form-card">
+        <h3 style="margin-bottom: 1rem; color: var(--gold);">Select Your Symptoms</h3>
+        <div class="symptoms-grid" id="symptomsGrid">
+            {% for symptom in symptoms %}
+            <label class="symptom-checkbox" id="label_{{ symptom }}">
+                <input type="checkbox" value="{{ symptom }}" onchange="toggleSymptom(this)">
+                {{ symptom | replace('_', ' ') | title }}
+            </label>
+            {% endfor %}
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <p style="color: var(--text-muted); margin-bottom: 1rem;" id="selectedCount">0 symptoms selected</p>
+            <button class="btn btn-primary btn-lg" onclick="predictDisease()">Predict Disease</button>
+        </div>
+    </div>
+
+    <div class="spinner" id="spinner"></div>
+    <div class="result-card" id="resultCard">
+        <div class="result-header">
+            <div class="result-icon warning" id="resultIcon">&#9763;</div>
+            <div class="result-title">
+                <h3 id="resultTitle">Prediction Results</h3>
+                <p id="resultSubtitle"></p>
+            </div>
+        </div>
+        <div id="resultDetails"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedSymptoms = [];
+
+function toggleSymptom(checkbox) {
+    const label = checkbox.parentElement;
+    if (checkbox.checked) {
+        selectedSymptoms.push(checkbox.value);
+        label.classList.add('checked');
+    } else {
+        selectedSymptoms = selectedSymptoms.filter(s => s !== checkbox.value);
+        label.classList.remove('checked');
+    }
+    document.getElementById('selectedCount').textContent = selectedSymptoms.length + ' symptoms selected';
+}
+
+async function predictDisease() {
+    if (selectedSymptoms.length === 0) {
+        alert('Please select at least one symptom.');
+        return;
+    }
+
+    const spinner = document.getElementById('spinner');
+    const resultCard = document.getElementById('resultCard');
+    resultCard.classList.remove('show');
+    spinner.classList.add('show');
+
+    try {
+        const res = await fetch('/api/predict/disease', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ symptoms: selectedSymptoms })
+        });
+        const json = await res.json();
+        spinner.classList.remove('show');
+
+        if (json.status === 'success') {
+            const r = json.result;
+            document.getElementById('resultTitle').textContent = 'Primary: ' + r.primary_prediction;
+            document.getElementById('resultSubtitle').textContent = 'Confidence: ' + r.confidence + '%';
+
+            let html = '<ul class="disease-list">';
+            r.top_predictions.forEach((pred, idx) => {
+                const sevClass = pred.severity.toLowerCase();
+                html += `
+                    <li class="disease-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h4>${idx + 1}. ${pred.disease} (${pred.probability}%)</h4>
+                            <span class="severity-badge severity-${sevClass}">${pred.severity}</span>
+                        </div>
+                        <p>${pred.description}</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar blue" style="width:${pred.probability}%"></div>
+                        </div>
+                        <strong style="font-size: 0.85rem; color: var(--gold);">Precautions:</strong>
+                        <ul class="precaution-list">
+                            ${pred.precautions.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+
+            html += '<div style="text-align: center; margin-top: 1.5rem;"><button class="btn btn-gold-outline btn-sm" onclick="downloadDiseaseReport()">Download PDF Report</button></div>';
+            document.getElementById('resultDetails').innerHTML = html;
+            resultCard.classList.add('show');
+            window._lastDiseaseResult = r;
+        } else {
+            alert('Error: ' + json.message);
+        }
+    } catch(err) {
+        spinner.classList.remove('show');
+        alert('Error connecting to server.');
+    }
+}
+
+async function downloadDiseaseReport() {
+    if (!window._lastDiseaseResult) return;
+    const r = window._lastDiseaseResult;
+    let details = r.top_predictions.map(p => p.disease + ': ' + p.probability + '% (' + p.severity + ')').join('\n');
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                model: 'Disease from Symptoms',
+                result: r.primary_prediction,
+                confidence: r.confidence,
+                details: details
+            })
+        });
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'MedicalCare_Disease_Report.pdf'; a.click();
+        URL.revokeObjectURL(url);
+    } catch(err) { alert('Error generating report.'); }
+}
+</script>
+{% endblock %}

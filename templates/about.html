@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}About - MedicalCare AI{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2rem;">
+    <div class="section-title">
+        <h2>About <span class="gold">This Project</span></h2>
+        <div class="section-divider"></div>
+        <p>Medical Care and Health Science using Machine Learning &amp; Deep Learning</p>
+    </div>
+
+    <!-- Creator Info -->
+    <div class="form-card" style="text-align: center; margin-bottom: 2rem;">
+        <div class="brand-logo" style="margin: 0 auto 1rem; width: 70px; height: 70px;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--navy);">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+        </div>
+        <h3 style="color: var(--gold); font-size: 1.5rem; margin-bottom: 0.5rem;">Created By</h3>
+        <p style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">B NIKITHA</p>
+        <p style="color: var(--gold); font-weight: 600; margin-bottom: 0.25rem;">25BCE2517</p>
+        <p style="color: var(--text-secondary);">Vellore Institute of Technology, Vellore</p>
+    </div>
+
+    <div class="form-card">
+        <h3 style="margin-bottom: 1rem; color: var(--gold);">Project Overview</h3>
+        <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem;">
+            This project demonstrates the application of <strong style="color: var(--text-primary);">Machine Learning</strong> and
+            <strong style="color: var(--text-primary);">Deep Learning</strong> techniques in the medical and healthcare domain.
+            It features multiple AI models for disease prediction, risk assessment, and
+            medical image analysis, all served through an interactive web interface.
+        </p>
+        <p style="color: #ff5252; font-weight: 600; font-size: 0.9rem;">
+            Disclaimer: This is an educational project. Predictions should NOT be used as a
+            substitute for professional medical advice, diagnosis, or treatment.
+        </p>
+    </div>
+
+    <!-- Features -->
+    <div class="section-title" style="margin-top: 3rem;">
+        <h2>Key <span class="gold">Features</span></h2>
+        <div class="section-divider"></div>
+    </div>
+
+    <div class="cards-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        <div class="form-card">
+            <h4 style="color: var(--gold); margin-bottom: 0.5rem;">Heart Disease Prediction</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Gradient Boosting Classifier with 13 clinical features for cardiovascular risk assessment.</p>
+        </div>
+        <div class="form-card">
+            <h4 style="color: var(--gold); margin-bottom: 0.5rem;">Diabetes Prediction</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Random Forest Classifier with 8 health indicators for diabetes risk analysis.</p>
+        </div>
+        <div class="form-card">
+            <h4 style="color: var(--gold); margin-bottom: 0.5rem;">Disease from Symptoms</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Multi-class Random Forest with 20 symptoms covering 10 diseases.</p>
+        </div>
+        <div class="form-card">
+            <h4 style="color: var(--gold); margin-bottom: 0.5rem;">Breast Cancer Detection</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Deep Neural Network (TensorFlow/Keras) with 10 cell nucleus measurements.</p>
+        </div>
+        <div class="form-card">
+            <h4 style="color: var(--gold); margin-bottom: 0.5rem;">Medical Image Classification</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">CNN with MobileNetV2 Transfer Learning for chest X-ray analysis.</p>
+        </div>
+        <div class="form-card">
+            <h4 style="color: var(--gold); margin-bottom: 0.5rem;">AI Health Chat</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Google Gemini powered chatbot for instant medical guidance with rule-based fallback.</p>
+        </div>
+        <div class="form-card">
+            <h4 style="color: var(--gold); margin-bottom: 0.5rem;">BMI Calculator</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Body Mass Index calculator with personalized health tips and PDF reports.</p>
+        </div>
+        <div class="form-card">
+            <h4 style="color: var(--gold); margin-bottom: 0.5rem;">User Auth &amp; History</h4>
+            <p style="color: var(--text-secondary); font-size: 0.9rem;">Login/Register system with prediction history tracking in SQLite database.</p>
+        </div>
+    </div>
+
+    <!-- Technology Stack -->
+    <div class="section-title" style="margin-top: 3rem;">
+        <h2>Technology <span class="gold">Stack</span></h2>
+        <div class="section-divider"></div>
+    </div>
+
+    <div class="tech-stack">
+        <div class="tech-item"><h4>Python 3.x</h4><p>Core Language</p></div>
+        <div class="tech-item"><h4>Flask</h4><p>Web Framework &amp; REST API</p></div>
+        <div class="tech-item"><h4>Scikit-Learn</h4><p>ML Algorithms</p></div>
+        <div class="tech-item"><h4>TensorFlow / Keras</h4><p>Deep Learning Framework</p></div>
+        <div class="tech-item"><h4>SQLite + SQLAlchemy</h4><p>Database &amp; ORM</p></div>
+        <div class="tech-item"><h4>Google Gemini</h4><p>AI Chat Assistant</p></div>
+        <div class="tech-item"><h4>Pandas / NumPy</h4><p>Data Processing</p></div>
+        <div class="tech-item"><h4>HTML / CSS / JS</h4><p>Frontend Interface</p></div>
+    </div>
+
+    <!-- Project Structure -->
+    <div class="form-card" style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1rem; color: var(--gold);">Project Structure</h3>
+        <pre style="background: rgba(10, 22, 40, 0.8); color: #69f0ae; padding: 1.5rem; border-radius: 8px; overflow-x: auto; font-size: 0.9rem; line-height: 1.8; border: 1px solid rgba(212, 168, 67, 0.15);">
+Medicalcare/
+├── app.py                    # Flask application (main entry)
+├── train.py                  # Model training script
+├── config.py                 # Configuration settings
+├── database.py               # SQLite database models
+├── requirements.txt          # Python dependencies
+├── models/
+│   ├── heart_disease_model.py    # Heart disease (Gradient Boosting)
+│   ├── diabetes_model.py         # Diabetes (Random Forest)
+│   ├── disease_predictor.py      # Disease from symptoms (RF Multi-class)
+│   ├── breast_cancer_model.py    # Breast cancer (Deep Neural Network)
+│   ├── image_classifier.py       # X-ray classification (CNN)
+│   └── saved/                    # Trained model files
+├── data/                     # Generated datasets (CSV)
+├── utils/
+│   └── data_generator.py    # Synthetic data generation
+├── static/
+│   ├── css/style.css         # Dark Navy + Gold theme
+│   └── uploads/              # Uploaded images
+├── templates/                # HTML templates
+│   ├── base.html, index.html, login.html, register.html
+│   ├── dashboard.html, about.html, ai_chat.html
+│   ├── bmi.html, history.html
+│   ├── heart_disease.html, diabetes.html
+│   ├── disease_prediction.html, breast_cancer.html
+│   └── image_classification.html
+└── notebooks/                # Jupyter notebooks
+        </pre>
+    </div>
+</div>
+{% endblock %}

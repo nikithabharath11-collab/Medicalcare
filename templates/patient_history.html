@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Patient History - MedicalCare AI{% endblock %}
+
+{% block content %}
+<div class="prediction-page">
+    <div class="page-header">
+        <h1>Patient History</h1>
+        <p>Your complete activity: login sessions, predictions, and saved reports</p>
+    </div>
+
+    <!-- Tab Buttons -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;">
+        <button class="btn btn-primary tab-btn active" onclick="showTab('predictions')">Predictions ({{ predictions|length }})</button>
+        <button class="btn btn-outline tab-btn" onclick="showTab('reports')">Saved Reports ({{ reports|length }})</button>
+        <button class="btn btn-outline tab-btn" onclick="showTab('logins')">Login History ({{ logins|length }})</button>
+    </div>
+
+    <!-- Predictions Tab -->
+    <div class="tab-content" id="tab-predictions">
+        <div class="form-card">
+            <h3 style="color: var(--gold); margin-bottom: 1rem;">Prediction History</h3>
+            {% if predictions %}
+            <div style="overflow-x: auto;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Model</th>
+                            <th>Result</th>
+                            <th>Confidence</th>
+                            <th>Risk Level</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pred in predictions %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td style="color: var(--gold); font-weight: 600;">{{ pred.model_name }}</td>
+                            <td>{{ pred.result }}</td>
+                            <td>
+                                {% if pred.confidence is not none %}
+                                    {{ pred.confidence }}{% if pred.confidence is number and pred.confidence <= 100 %}%{% endif %}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if pred.risk_level in ['High Risk', 'High', 'Malignant', 'Diabetic', 'Obese'] %}
+                                    <span class="severity-badge severity-severe">{{ pred.risk_level }}</span>
+                                {% elif pred.risk_level in ['Moderate', 'Overweight'] %}
+                                    <span class="severity-badge severity-moderate">{{ pred.risk_level }}</span>
+                                {% else %}
+                                    <span class="severity-badge severity-mild">{{ pred.risk_level }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-size: 0.8rem;">{{ pred.created_at.strftime('%b %d, %Y %I:%M %p') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No predictions yet. Use our AI models to see your history here.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Saved Reports Tab -->
+    <div class="tab-content" id="tab-reports" style="display: none;">
+        <div class="form-card">
+            <h3 style="color: var(--gold); margin-bottom: 1rem;">Saved PDF Reports</h3>
+            {% if reports %}
+            <div style="overflow-x: auto;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Report Name</th>
+                            <th>Model</th>
+                            <th>Result</th>
+                            <th>Date</th>
+                            <th>Download</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td style="color: var(--gold);">{{ report.report_name }}</td>
+                            <td>{{ report.model_name }}</td>
+                            <td>{{ report.result or 'N/A' }}</td>
+                            <td style="font-size: 0.8rem;">{{ report.created_at.strftime('%b %d, %Y %I:%M %p') }}</td>
+                            <td><a href="/download-report/{{ report.id }}" class="btn btn-sm btn-gold-outline">Download</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No reports generated yet. Use the "Download PDF Report" button after any prediction.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Login History Tab -->
+    <div class="tab-content" id="tab-logins" style="display: none;">
+        <div class="form-card">
+            <h3 style="color: var(--gold); margin-bottom: 1rem;">Login Sessions</h3>
+            {% if logins %}
+            <div style="overflow-x: auto;">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Login Time</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logins %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ log.login_time.strftime('%b %d, %Y at %I:%M %p') }}</td>
+                            <td style="color: var(--text-muted);">{{ log.ip_address or 'N/A' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No login history available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('active', 'btn-primary');
+        el.classList.add('btn-outline');
+    });
+    document.getElementById('tab-' + name).style.display = 'block';
+    event.target.classList.remove('btn-outline');
+    event.target.classList.add('active', 'btn-primary');
+}
+</script>
+{% endblock %}
