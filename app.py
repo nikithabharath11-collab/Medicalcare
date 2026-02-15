@@ -43,8 +43,15 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 with app.app_context():
     db.create_all()
 
-# --- Load Models ---
+# --- Auto-train models if not found (for Render / fresh deploy) ---
 MODEL_DIR = os.path.join(BASE_DIR, 'models', 'saved')
+if not os.path.exists(os.path.join(MODEL_DIR, 'heart_disease_model.pkl')):
+    print("Models not found. Training now (first-time setup)...")
+    from train import train_all
+    train_all()
+    print("Training complete!\n")
+
+# --- Load Models ---
 heart_model = HeartDiseasePredictor(os.path.join(MODEL_DIR, 'heart_disease_model.pkl'))
 diabetes_model = DiabetesPredictor(os.path.join(MODEL_DIR, 'diabetes_model.pkl'))
 disease_model = DiseasePredictor(os.path.join(MODEL_DIR, 'disease_model.pkl'))
