@@ -28,7 +28,13 @@ from models.image_classifier import MedicalImageClassifier
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'medicalcare.db')
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+if DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+if DATABASE_URL:
+    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'medicalcare.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Init extensions
@@ -43,13 +49,15 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 with app.app_context():
     db.create_all()
 
-# --- Auto-train models if not found (for Render / fresh deploy) ---
+# --- Auto-train models if not found ---
 MODEL_DIR = os.path.join(BASE_DIR, 'models', 'saved')
 if not os.path.exists(os.path.join(MODEL_DIR, 'heart_disease_model.pkl')):
-    print("Models not found. Training now (first-time setup)...")
+    print("Models not found. Training now...")
     from train import train_all
     train_all()
     print("Training complete!\n")
+else:
+    print("Models already trained. Skipping training.")
 
 # --- Load Models ---
 heart_model = HeartDiseasePredictor(os.path.join(MODEL_DIR, 'heart_disease_model.pkl'))

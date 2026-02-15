@@ -13,3 +13,4 @@ fpdf2
 google-generativeai
 requests
 gunicorn
+psycopg2-binary
